@@ -1,0 +1,42 @@
+//reverse string
+void reverseString(char* s, int sSize){
+    int start = 0;
+    int end = sSize - 1;
+    while(start  < end){
+        char temp = s[start];
+        s[start] = s[end];
+        s[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+/*
+void dump_test(char * s,int len){
+    s[0] = 'k';
+    return;
+}
+
+int main(){
+    char s[3] = {'a','b','c'};
+    int len = 3;
+    dump_test(s,3);    //no segmentation fault
+    reverseString(s,len);
+    int i = 0;
+    for(i=0;i<len;i++){
+        printf("s: %c\n",s[i]);
+    }
+
+    char * ms = malloc(sizeof(char)*3);
+    ms[0] = 'a';
+    ms[1] = 'b';
+    ms[2] = 'c';
+    dump_test(ms,3);    //no segmentation fault
+    for(i=0;i<3;i++){
+        printf("ms: %c\n",ms[i]);
+    }
+
+    char * s1 = "abc";
+    sump_test(s1.3);   //segmentation fault
+}
+*/
