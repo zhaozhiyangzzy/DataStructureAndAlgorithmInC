@@ -1,0 +1,84 @@
+struct set_node{
+    int key;
+    int value;
+    struct set_node * next;
+};
+
+struct set_node * set_node_init(int key_value){
+    struct set_node * temp = malloc(sizeof(struct set_node));
+    temp->key=key_value;
+    temp->value = 1;
+    temp->next=NULL;
+    return temp;
+}
+
+void set_node_free(struct set_node * set){
+    struct set_node * to_free = set->next;
+    while(to_free!=NULL){
+        set->next=to_free->next;
+        free(to_free);
+        to_free=set->next;
+    }
+    free(set);
+    return;
+}
+
+void set_insert(struct set_node * set,int key_value){
+    struct set_node * temp = set_node_init(key_value);
+    if(set->next==NULL){
+        temp->next=set->next;
+        set->next=temp;
+    }
+    else{
+        int found_flag = 0;
+        struct set_node * p = set->next;
+        while(p!=NULL){
+            if(p->key==key_value){
+                found_flag=1;
+                (p->value)++;
+                //need free temp,otherwise memory leak
+                free(temp);
+                break;
+            }
+            if(p->next==NULL)
+                break;
+            p=p->next;
+        }
+        if(found_flag==0){
+            temp->next=p->next;
+            p->next=temp;
+        }
+    }
+}
+int majorityElement(int* nums, int numsSize){
+    int i=0;
+    int flag=numsSize/2;
+    int ret=-1;
+    struct set_node * set = set_node_init(-1);
+    for(i=0;i<numsSize;i++){
+        set_insert(set,nums[i]);
+    }
+    struct set_node * data = set->next;
+    while(data!=NULL){
+        if(data->value > flag){
+            ret=data->key;
+            break;
+        }
+        data=data->next;
+    }
+    set_node_free(set);
+    return ret;
+}
+/*
+int main(){
+    int test1[]={1,2,5,9,5,9,5,5,5,5};
+    int test2[]={3,2};
+    int test3[]={2,2,1,1,1,2,2};
+
+    int r1 = majorityElement(test1,sizeof(test1)/sizeof(test1[0]));
+    int r2 = majorityElement(test2,sizeof(test2)/sizeof(test2[0]));
+    int r3 = majorityElement(test3,sizeof(test3)/sizeof(test3[0]));
+
+    printf("r1=%d,r2=%d,r3=%d\n",r1,r2,r3);
+}
+*/
