@@ -1,0 +1,196 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+
+ struct list_node{
+     int v;
+     struct list_node * next;
+ };
+
+ struct list_node * node_init(int v_value){
+     struct list_node * t = malloc(sizeof(struct list_node));
+     t->v = v_value;
+     t->next=NULL;
+     return t;
+ }
+
+ void node_insert(struct list_node * head,struct list_node * temp){
+     struct list_node * t = head->next;
+     if(t==NULL){
+         head->next=temp;
+     }
+     else{
+         while(t->next!=NULL){
+             t=t->next;
+         }
+         t->next=temp;
+     }
+ }
+
+ void graph_free(struct list_node *graph[],int v){
+     int i = 0;
+     for(i=0;i<v;i++){
+         struct list_node * head = graph[i];
+         struct list_node * p = head->next;
+         while(p!=NULL){
+             head->next=p->next;
+             free(p);
+             p=head->next;
+         }
+         free(head);
+     }
+ }
+
+ int cal_distance(char * source,char * dest){
+     int i = 0;
+     int len = strlen(source);
+     int distance = 0;
+
+     for(i=0;i<len;i++){
+         if(source[i]!=dest[i]){
+             distance++;
+         }
+     }
+     return distance;
+ }
+
+ 
+char** findLadders(char* beginWord, char* endWord, char** wordList, int wordListSize, int* returnSize){
+    int i=0,j=0;
+    int found_index=-1;
+    int path_flag=0;
+    int row=wordListSize;
+    int v = row+1;
+    int len  =1;
+    int dist = 0;
+    int word_len = strlen(beginWord);
+    for(i=0;i<row;i++){
+        if(strncmp(endWord,wordList[i],strlen(endWord))==0){
+            found_index=i+1;   //graph index i+1
+            break;
+        }
+    }
+    if(found_index==-1){
+        (*returnSize)=0;
+        return NULL;
+    }
+
+    //book
+    int * known = malloc(sizeof(int)*v);
+    int * d = malloc(sizeof(int)*v);
+    int * p = malloc(sizeof(int)*v);
+    for(i=0;i<v;i++){
+        known[i]=0;
+        d[i]=-1;
+        p[i]=0;
+    }
+    d[0]=0;  //start point
+
+    //2.init a graph
+    struct list_node * graph[v];
+    for(i=0;i<v;i++){
+        struct list_node * temp = node_init(i);
+        graph[i]=temp;
+    }
+
+    for(i=0;i<row;i++){
+        if(cal_distance(beginWord,wordList[i])==1){
+            int src=0;
+            int dest=i+1;
+            struct list_node * temp = node_init(dest);
+            node_insert(graph[src],temp);
+        }
+    }
+    for(i=0;i<row;i++){
+        for(j=0;j<row;j++){
+            if(cal_distance(wordList[i],wordList[j])==1){
+                int src=i+1;
+                int dest=j+1;
+                struct list_node * temp = node_init(dest);
+                node_insert(graph[src],temp);
+            }
+        }
+    }
+    //init graph end
+
+    //BFS
+    for(dist=0;dist<v;dist++){
+        for(i=0;i<v;i++){
+            if((known[i]!=1)&&(d[i]==dist)){
+                known[i]=1;
+                struct list_node * temp = graph[i]->next;
+                while(temp!=NULL){
+                    int value = temp->v;
+                    if(known[value]!=1){
+                        d[value]=dist+1;
+                        p[value]=i;
+                    }
+                    temp=temp->next;
+                }
+            }
+        }
+    }
+
+    if(known[found_index]==0){
+        (*returnSize)=0;
+        free(known);
+        free(d);
+        free(p);
+        return NULL;
+    }
+    else{
+        int t = found_index;
+        int temp_len = 0;
+        while(p[t]!=0){
+            len++;
+            t=p[t];
+            if(len>v){
+                //dead loop
+                break;
+            }
+        }
+        len++;
+        char ** ret = malloc(sizeof(char *)*len);
+        t=found_index;
+        temp_len=len;
+        while(t!=0){
+            temp_len--;
+            char * temp_string = malloc(sizeof(char)*(word_len+1));
+            strncpy(temp_string,wordList[t-1],word_len);
+            temp_string[word_len]='\0';
+            ret[temp_len]=temp_string;
+            t=p[t];
+            if(len<0){
+                //memory corrup
+                break;
+            }
+        }
+        char * start_s = malloc(sizeof(char)*(word_len+1));
+        strncpy(start_s,beginWord,word_len);
+        start_s[word_len]='\0';
+        ret[0]=start_s;
+        free(known);
+        free(d);
+        free(p);
+        (*returnSize)=len;
+        return ret;
+    }
+}
+
+/*
+int main(){
+    char * test1[6]={
+        "hot",
+        "dot",
+        "dog",
+        "lot",
+        "log",
+        "cog"
+    };
+    char * begin = "hit";
+    char * end = "cog";
+    int num = 0;
+    char ** ret1=findLadders(begin,end,test1,6,&num);
+    //print ret1
+}
+*/
