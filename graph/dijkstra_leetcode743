@@ -1,0 +1,145 @@
+struct list_node{
+    int index;
+    int cost;
+    struct list_node * next;
+};
+
+struct table_entry{
+    //struct list_node * head;
+    int known;
+    int dist;
+    int path;
+};
+
+struct list_node * queue_node_init(int n,int d){
+    struct list_node * t = malloc(sizeof(struct list_node));
+    t->index=n;
+    t->cost=d;
+    t->next=NULL;
+    return t;
+}
+
+void queue_insert_tail(struct list_node * head,struct list_node * temp){
+    struct list_node * t = head->next;
+    if(t==NULL){
+        head->next = temp;
+    }
+    else{
+        while(t->next!=NULL){
+            t=t->next;
+        }
+        t->next=temp;
+    }
+}
+
+void queue_free(struct list_node * head){
+    struct list_node * t = head->next;
+    while(t!=NULL){
+        head->next=t->next;
+        free(t);
+        t=head->next;
+    }
+    free(head);
+}
+
+void graph_free(struct list_node * graph[],int v){
+    int i = 0;
+    for(i=0;i<v;i++){
+        struct list_node * head=graph[i];
+        struct list_node * p = head->next;
+        while(p!=NULL){
+            head->next=p->next;
+            free(p);
+            p-head->next;
+        }
+        free(head);
+    }
+}
+
+struct list_node ** graph_init(int ** data,int row,int * col,int v){
+    int i = 0;
+    struct list_node ** graph = malloc(sizeof(struct list_node *)*v);
+    for(i=0;i<v;i++){
+        struct list_node * temp = queue_node_init(i,0);
+        graph[i]=temp;
+    }
+
+    //insert data start
+    for(i=0;i<row;i++){
+        int src=data[i][0]-1;    //what? always put data[row][0],src index =src-1
+        int dest = data[i][1]-1;
+        int d = data[i][2];
+        struct list_node * temp = queue_node_init(dest,d);
+        queue_insert_tail(graph[src],temp);
+    }
+    //insert data end
+    return graph;
+}
+int networkDelayTime(int** times, int timesSize, int* timesColSize, int n, int k){
+    int i = 0;
+    int ret = -1;
+    int longest = 0;
+    //2.init a graph
+    struct list_node ** graph = graph_init(times,timesSize,timesColSize,n);
+
+    //3.find longest
+    for(i=0;i<timesSize;i++){
+        longest+=times[i][2];  //didn't know longest, maybe overflow
+    }
+
+    //4.init table
+    struct table_entry t[n]; //maybe need malloc?
+    for(i=0;i<n;i++){
+        t[i].known = -1;
+        t[i].dist = longest+1;
+        t[i].path = -1;
+    }
+    //k index is k-1
+    t[k-1].dist=0;
+
+    //Dijkstra algo
+    while(1){
+        int temp_smallest = longest;
+        int next_v = -1;
+        
+        //find temp shortest
+        for(i=0;i<n;i++){
+            if((t[i].dist==-1) || (t[i].known==1)){
+                continue;
+            }
+            else{
+                if(t[i].dist<=temp_smallest){
+                    temp_smallest=t[i].dist;
+                    next_v = i;
+                }
+            }
+        }
+
+        if(next_v==-1){
+            break;
+        }
+        t[next_v].known = 1;
+        struct list_node * temp_head = graph[next_v]->next;
+        while(temp_head!=NULL){
+            int p = temp_head->index;
+            if(t[p].known==-1){
+                int temp_d = temp_head->cost;
+                if((t[next_v].dist+temp_d)<t[p].dist){
+                    t[p].dist=t[next_v].dist+temp_d;
+                    t[p].path=next_v;
+                }
+            }
+            temp_head=temp_head->next;
+        }
+    }
+    for(i=0;i<n;i++){
+        if(t[i].known==-1){
+            ret=-1;
+            break;
+        }
+        if(t[i].dist>ret){
+            ret=t[i].dist;
+        }
+    }
+    return ret;
+}
