@@ -1,0 +1,99 @@
+struct table_entry{
+    int known;
+    int dist;
+    int path;
+};
+
+int manhattan_distance(int x1,int y1,int x2,int y2){
+    int ret = 0;
+    int tempx= x1-x2;
+    int tempy = y1-y2;
+    if(tempx>0){
+        ret = ret+tempx;
+    }
+    else{
+        ret = ret-tempx;
+    }
+
+    if(tempy>0){
+        ret = ret+tempy;
+    }
+    else{
+        ret = ret-tempy;
+    }
+    return ret;
+}
+//1.construct a graph
+//2.init a table
+//3.use prim algo to find minimum cost
+
+int minCostConnectPoints(int** points, int pointsSize, int* pointsColSize){
+    int row = pointsSize;
+    int i=0,j=0;
+    int * temp_row = NULL;
+    struct table_entry t[row];
+    int count = 0;
+    int tempmin_node = 0;
+    int longest = 0;
+    int temp_md = 0;
+    int ret = 0;
+
+    //1.construct a graph
+    int ** graph = malloc(sizeof(int *)*row);
+    for(i=0;i<row;i++){
+        temp_row = malloc(sizeof(int)*row);
+        memset(temp_row,0,row);
+        graph[i]=temp_row;
+    }
+    for(i=0;i<row;i++){
+        for(j=0;j<row;j++){
+            temp_md=manhattan_distance(points[i][0],points[i][1],points[j][0],points[j][1]);
+            if(temp_md>longest){
+                longest=temp_md;
+            }
+            graph[i][j]=temp_md;
+        }
+    }
+    //2.init a table
+    for(i=0;i<row;i++){
+        t[i].known = -1;
+        t[i].dist = longest;
+        t[i].path = -1;
+    }
+    t[0].dist = 0;
+    while(count<row){
+        //find tmep minimum node
+        temp_md = longest;
+        for(i=0;i<row;i++){
+            if(t[i].known==1){
+                continue;
+            }
+            if((t[i].dist)<=temp_md){
+                temp_md = t[i].dist;
+                tempmin_node = i;
+            }
+            else{
+                continue;
+            }
+        }
+        count++;
+        t[tempmin_node].known=1;
+        temp_row = graph[tempmin_node];
+        for(j=0;j<row;j++){
+            if(t[j].known==1){
+                continue;
+            }
+            if(graph[tempmin_node][j]<t[j].dist){
+                t[j].dist = graph[tempmin_node][j];
+            }
+            else{
+                continue;
+            }
+        }
+    }
+    for(i=0;i<row;i++){
+        ret=ret+t[i].dist;
+    }
+    return ret;
+
+}
