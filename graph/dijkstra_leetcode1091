@@ -1,0 +1,126 @@
+struct list_node{
+    int row;
+    int col;
+    int distance;
+    struct list_node * next;
+};
+
+struct list_node * queue_node_init(int i,int j,int d){
+    struct list_node * t = malloc(sizeof(struct list_node));
+    t->row=i;
+    t->col=j;
+    t->distance=d;
+    t->next=NULL;
+    return t;
+}
+
+void queue_insert_tail(struct list_node *head,struct list_node * temp){
+    struct list_node * t = head->next;
+    if(t==NULL){
+        head->next=temp;
+    }
+    else{
+        while(t->next!=NULL){
+            t=t->next;
+        }
+        t->next=temp;
+    }
+}
+
+void queue_free(struct list_node *head){
+    struct list_node * t = head->next;
+    while(t!=NULL){
+        head->next=t->next;
+        free(t);
+        t=head->next;
+    }
+    free(head);
+}
+
+
+int shortestPathBinaryMatrix(int** grid, int gridSize, int* gridColSize){
+    int ret= -1;
+    if(grid[0][0]!=0){
+        return ret;
+    }
+    int i=0;
+    int j=0;
+    int end = gridSize-1;
+    int found = 0;
+    int row = gridSize;
+    int col = (*gridColSize);
+
+    //almost BFS algo:Mark visited nodes.need free
+    int ** flag = (malloc(sizeof(int *)*row));
+    for(i=0;i<gridSize;i++){
+        int * temp_col = malloc(sizeof(int)*col);
+        flag[i]=temp_col;
+        for(j=0;j<col;j++){
+            temp_col[j]=0;
+        }
+    }
+    struct list_node * head = queue_node_init(-1,-1,-1);
+    struct list_node * first_node = queue_node_init(0,0,1); //first node distance is 1
+    queue_insert_tail(head,first_node);
+    struct list_node * t = head->next;
+    while(t!=NULL){
+        //enqueue v aroud t;
+        int tempi = t->row;
+        int tempj = t->col;
+        int tempd = t->distance;
+
+        int p = 0;
+        int q = 0;
+
+        //BFS
+
+        for(p=tempi-1;p<=tempi+1;p++){
+            for(q=tempj-1;q<=tempj+1;q++){
+                if((p<0) || (q<0) || (p>=row) || (q>=col)){
+                    continue;
+                }
+                if(flag[p][q]==1){
+                    continue;
+                }
+                if(grid[p][q]==0){
+                    //if found
+                    if((p==end) && (q==end)){
+                        if((p==0)&&(q==0)){
+                            //just one node
+                            ret=1;
+                        }
+                        else{
+                            ret = tempd+1;
+                        }
+                        found=1;
+                        break;
+                    }
+                    else{
+                        flag[p][q]=1;
+                        struct list_node * temp_node = queue_node_init(p,q,tempd+1);
+                        queue_insert_tail(head,temp_node);
+                    }
+                }
+            }
+            if(found==1){
+                break;
+            }
+        }
+        if(found==1){
+            break;
+        }
+        //if(row-1,col-1) enqueue,break;
+        //delete temp node
+        head->next=t->next;
+        free(t);
+        t=head->next;
+    }
+    //free queue
+    for(i=0;i<row;i++){
+        int * free_row = flag[i];
+        free(free_row);
+    }
+    free(flag);
+    queue_free(head);
+    return ret;
+}
