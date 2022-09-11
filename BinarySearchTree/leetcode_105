@@ -1,0 +1,63 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+struct TreeNode * node_init(int n){
+    struct TreeNode * temp = malloc(sizeof(struct TreeNode));
+    temp->val = n;
+    temp->left = NULL;
+    temp->right = NULL;
+    return temp;
+    }
+
+struct TreeNode* buildhelper(int* inorder, int inorderSize, int* preorder, int preorderSize,int is,int ie,int ps,int pe){
+    int i=0,len=0,leftlen=0,rightlen=0;
+    int tempin=0,temppre=0;
+    if((is>ie)||(ps>pe)){
+        return NULL;
+        }
+    len=ie-is+1;
+    struct TreeNode * root=node_init(preorder[ps]);
+    for(i=is;i<=ie;i++){
+        if(inorder[i]==preorder[ps]){
+            break;
+            }
+        leftlen++;
+        }
+    rightlen=len-leftlen-1;
+    
+    if(leftlen>0){
+        tempin=is;
+        temppre=ps+1;
+        root->left=buildhelper(inorder,inorderSize,preorder,preorderSize,tempin,tempin+leftlen-1,temppre,temppre+leftlen-1);
+        }
+    if(rightlen>0){
+        tempin=i+1;
+        temppre=ps+1+leftlen;
+        root->right=buildhelper(inorder,inorderSize,preorder,preorderSize,tempin,tempin+rightlen-1,temppre,temppre+rightlen-1);
+    }
+    return root;
+}
+
+struct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize){
+    int is=0;
+    int ie=inorderSize-1;
+    int ps=0;
+    int pe=ie;
+    struct TreeNode * ret=buildhelper(inorder,inorderSize,preorder,preorderSize,is,ie,ps,pe);
+    return ret;
+}
