@@ -1,0 +1,8 @@
+/bin/echo -e "NAME = dummy\nSRCS = tests/dummy.c\nLIBS += klib\ninclude ${AM_HOME}/Makefile" > Makefile.dummy
+if make -s -f Makefile.dummy ARCH=riscv32-nemu ; then \
+	printf "[%14s] \033[1;32mPASS!\033[0m\n" dummy >> .result; \
+else \
+	printf "[%14s] \033[1;31mFAIL!\033[0m\n" dummy >> .result; \
+fi
+rm -f Makefile.dummy
+echo "" dummy
