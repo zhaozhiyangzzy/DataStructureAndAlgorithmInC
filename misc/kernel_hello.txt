@@ -1,0 +1,36 @@
+
+/home/zzyubuntu/ics2022/am-kernels/kernels/hello/build/hello-riscv32-nemu.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80000000 <_start>:
+80000000:	00000413          	li	s0,0
+80000004:	00009117          	auipc	sp,0x9
+80000008:	ffc10113          	addi	sp,sp,-4 # 80009000 <_end>
+8000000c:	030000ef          	jal	ra,8000003c <_trm_init>
+
+80000010 <main>:
+80000010:	ff010113          	addi	sp,sp,-16
+80000014:	07a00513          	li	a0,122
+80000018:	00112623          	sw	ra,12(sp)
+8000001c:	014000ef          	jal	ra,80000030 <putch>
+80000020:	00c12083          	lw	ra,12(sp)
+80000024:	00000513          	li	a0,0
+80000028:	01010113          	addi	sp,sp,16
+8000002c:	00008067          	ret
+
+80000030 <putch>:
+80000030:	a00007b7          	lui	a5,0xa0000
+80000034:	3ea78c23          	sb	a0,1016(a5) # a00003f8 <_end+0x1fff73f8>
+80000038:	00008067          	ret
+
+8000003c <_trm_init>:
+8000003c:	80000537          	lui	a0,0x80000
+80000040:	ff010113          	addi	sp,sp,-16
+80000044:	05c50513          	addi	a0,a0,92 # 8000005c <_end+0xffff705c>
+80000048:	00112623          	sw	ra,12(sp)
+8000004c:	fc5ff0ef          	jal	ra,80000010 <main>
+80000050:	00050513          	mv	a0,a0
+80000054:	00100073          	ebreak
+80000058:	0000006f          	j	80000058 <_trm_init+0x1c>
